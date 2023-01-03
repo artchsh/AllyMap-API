@@ -4,22 +4,15 @@ const schema = require('../models/model')
 const errors = require('../errors')
 const multer = require('multer')
 const fs = require('fs')
+const sharp = require('sharp')
+const uuid = require('uuid')
 
-router.use(logger)
-function logger(req, res, next) {
-    console.log(req.originalUrl)
-    next()
-}
-
-const upload = multer({ dest: 'images/' })
-
-router.get('/', (req, res) => {
-    res.json('institutions API')
-})
+const storage = multer.memoryStorage();
+const upload = multer({ dest: 'images/', storage })
 
 router.post('/find', (req, res) => {
     schema.institution.find(req.body.query || {}, (err, docs) => {
-        if (err) { return res.json(errors.internalError) }
+        if (err) { return res.json(errors.internalError).status(500) }
         else { res.json(docs) }
     })
 })
@@ -27,24 +20,22 @@ router.post('/find', (req, res) => {
 // Add new institution
 router.post('/add', (req, res) => {
     const institution = new schema.institution(req.body)
-    if (req.body.title) {
-        institution.save((err, docs) => {
-            if (err) { return res.json(errors.internalError) }
-            res.json(docs)
-        })
-    } else { return res.json(errors.fieldsEmpty) }
+    institution.save((err, docs) => {
+        if (err) { return res.json(errors.internalError).status(500) }
+        res.json(docs)
+    })
 })
 
 // Remove existing institution
 router.post('/remove', (req, res) => {
     // { query: { id } }
     schema.institution.deleteOne(req.body.query, (err, docs) => {
-        if (err) { return res.json(errors.internalError) }
+        if (err) { return res.json(errors.internalError).status(500) }
         if (docs.imagePath != '' && docs.imagePath != undefined) {
             let imagePathBeforeFormat = docs.imagePath
             let path = imagePathBeforeFormat.replace(/\\/g, "/")
             fs.unlink(path, (err) => {
-                if (err) { return res.json(errors.internalError) }
+                if (err) { return res.json(errors.internalError).status(500) }
                 console.log(`Deleted file ${path}`)
             })
         }
@@ -56,16 +47,24 @@ router.post('/remove', (req, res) => {
 router.post('/edit', (req, res) => {
     // { query: { id }, updated: { address: ryskulova } }
     schema.institution.findOneAndUpdate(req.body.query, req.body.updated, (err, docs) => {
-        if (err) { return res.json(errors.internalError) }
+        if (err) { return res.json(errors.internalError).status(500) }
         else { res.json(docs) }
     })
 })
 
 // Create new request for new institution
-router.post('/request/new', upload.single('image'), (req, res) => {
+router.post('/request/new', upload.single('image'), async (req, res) => {
     let imagePath = ''
     if (req.file != undefined) {
-        imagePath = req.file.path
+        fs.access("./images", (error) => {
+            if (error) {
+                fs.mkdirSync("./images");
+            }
+        });
+        const { buffer } = req.file;
+        const ref = `${uuid.v4()}.webp`;
+        await sharp(buffer).webp({ quality: 20 }).toFile("./images/" + ref)
+        imagePath = `images/${ref}`
     }
     let requestInstitutionBody = {
         title: req.body.title,
@@ -86,7 +85,7 @@ router.post('/request/new', upload.single('image'), (req, res) => {
 router.post('/request/accept', (req, res) => {
     // { query: { ID: ID } }
     schema.requestInstitution.findOneAndDelete(req.body.query, (err, docs) => {
-        if (err) { return res.json(errors.internalError) }
+        if (err) { return res.json(errors.internalError).status(500) }
         const newInstitutionDocs = {
             title: docs.title,
             description: docs.description,
@@ -98,7 +97,7 @@ router.post('/request/accept', (req, res) => {
         }
         const instituion = new schema.institution(newInstitutionDocs)
         instituion.save((err, docs) => {
-            if (err) { return res.json(errors.internalError) }
+            if (err) { return res.json(errors.internalError).status(500) }
             res.json(docs)
         })
     })
@@ -108,11 +107,11 @@ router.post('/request/accept', (req, res) => {
 router.post('/request/decline', (req, res) => {
     // { query: { ID: ID } }
     schema.requestInstitution.findOneAndRemove(req.body.query, (err, docs) => {
-        if (err) { return res.json(errors.internalError) }
+        if (err) { return res.json(errors.internalError).status(500) }
         if (docs.imagePath != '' && docs.imagePath != undefined) {
             let path = docs.imagePath.replace(/\\/g, "/")
             fs.unlink(path, (err) => {
-                if (err) { return res.json(errors.internalError) }
+                if (err) { return res.json(errors.internalError).status(500) }
                 console.warn(`Deleted file ${path}`)
             });
         }
@@ -124,7 +123,7 @@ router.post('/request/decline', (req, res) => {
 router.post('/request/find', (req, res) => {
     // { query: { someid } }
     schema.requestInstitution.find(req.body.query || {}, (err, docs) => {
-        if (err) { return res.json(errors.internalError) }
+        if (err) { return res.json(errors.internalError).status(500) }
         res.json(docs)
     })
 })

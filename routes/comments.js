@@ -2,21 +2,13 @@ const express = require('express')
 const router = express.Router()
 const schema = require('../models/model')
 const errors = require('../errors')
-router.use(logger)
-function logger(req, res, next) {
-    console.log(req.originalUrl)
-    next()
-}
-router.get('/', (req, res) => {
-    res.json('comments API')
-})
 
 router.post('/get', (req, res) => {
     // { query: { id: 'someid' } }
     schema.comment.find(req.body.query, (err, docs) => {
-        if (err) { return res.json(errors.internalError) }
+        if (err) { return res.json(errors.internalError).status(500) }
         if (docs) { res.json(docs) }
-        else { res.json(errors.internalError) }
+        else { res.json(errors.internalError.status(500)) }
     })
 })
 
@@ -36,7 +28,7 @@ router.post('/add', (req, res) => {
     }
     const comment = new schema.comment(newComment)
     comment.save((err, docs) => {
-        if (err) { return res.json(errors.internalError) }
+        if (err) { return res.json(errors.internalError).status(500) }
         res.json(docs._id)
     })
 })

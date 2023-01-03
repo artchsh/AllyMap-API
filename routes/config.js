@@ -3,17 +3,10 @@ const router = express.Router()
 const schema = require('../models/model')
 const errors = require('../errors')
 
-router.use(logger)
-
-function logger(req, res, next) {
-    console.log(req.originalUrl)
-    next()
-}
-
 router.get('/', (req, res) => {
     schema.config.findOne({}, (err, docs) => {
-        if (err) { res.json(errors.internalError)}
-        else if (docs == null) { res.json(errors.internalError)}
+        if (err) { res.json(errors.internalError) }
+        else if (docs == null) { res.json(errors.internalError).status(500) }
         else { res.json(docs) }
     })
 })
@@ -25,14 +18,14 @@ router.get('/create', (req, res) => {
         version: 'v1.7 dev'
     })
     newConfig.save((err, docs) => {
-        if (err) { return res.json(errors.internalError) }
+        if (err) { return res.json(errors.internalError).status(500) }
         res.json(docs)
     })
 })
 
 router.post('/update', (req, res) => {
     schema.config.findOneAndUpdate({}, req.body, (err, docs) => {
-        if (err) { res.json(errors.internalError)}
+        if (err) { res.json(errors.internalError).status(500) }
         res.json(docs)
     })
 })
