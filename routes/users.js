@@ -5,7 +5,7 @@ const schema = require('../models/model')
 const uuid = require('uuid')
 const errors = require('../errors')
 const jwt = require('jsonwebtoken')
-const security = require('../config/secutiry')
+const security = require('../config/security')
 
 // function that generates invite code for user
 function generateInviteCode() {

@@ -1,7 +1,7 @@
 const schema = require('./models/model')
 const validator = require('validator')
 const jwt = require('jsonwebtoken')
-const security = require('./config/secutiry')
+const security = require('./config/security')
 
 module.exports = {
     authenticate: (req, res, next) => {
