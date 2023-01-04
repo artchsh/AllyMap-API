@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
 const middlewares = require('./middlewares')
+const security = require('./config/security')
 
 // express setup
 const app = express()
@@ -58,7 +59,8 @@ app.listen(port, () => {
   db.once('open', _ => {
     const API = { name: 'ExpressJS', status: `AllyMap API listening on port - ${port}` }
     const MONGODB = { name: 'MongoDB', status: `Database connected: ${url}` }
-    console.table([API, MONGODB], ['name', 'status'])
+    const JWT_SECRET = { name: 'JWT', status: `Token retrieved: ${security.JWT_SECRET}` }
+    console.table([API, MONGODB, JWT_SECRET], ['name', 'status'])
   })
   db.on('error', err => {
     console.error('Сonnection error:', err)
