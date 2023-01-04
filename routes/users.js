@@ -4,7 +4,8 @@ const router = express.Router()
 const schema = require('../models/model')
 const uuid = require('uuid')
 const errors = require('../errors')
-
+const jwt = require('jsonwebtoken')
+const security = require('../config/secutiry')
 
 // function that generates invite code for user
 function generateInviteCode() {
@@ -29,16 +30,20 @@ router.post('/login', (req, res) => {
         bcrypt.compare(password, hash, function (err, result) {
             if (err) { res.json(errors.internalError).status(500) }
             if (result) {
-                let token = uuid.v4()
-                res.json({
-                    token,
-                    docs: {
-                        _id: docs._id,
-                        login: docs.login,
-                        acceptCode: docs.acceptCode,
-                        inviteCode: docs.inviteCode
-                    },
-                    expiresIn: 360
+                let updatedDocs = {
+                    _id: docs._id,
+                    login: docs.login,
+                    acceptCode: docs.acceptCode,
+                    inviteCode: docs.inviteCode
+                } // uuid.v4()
+                let token = jwt.sign(updatedDocs, security.JWT_SECRET)
+                schema.user.findOneAndUpdate({_id: docs._id}, { token }, (err, docs) => {
+                    if (err) { res.json(errors.internalError).status(500) }
+                    res.json({
+                        token,
+                        docs: updatedDocs,
+                        expiresIn: 360
+                    })
                 })
             }
         })

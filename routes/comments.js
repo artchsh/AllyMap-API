@@ -33,4 +33,12 @@ router.post('/add', (req, res) => {
     })
 })
 
+router.post('/remove', (req, res) => {
+    // { query: { _id: 'someid' } }
+    schema.comment.findByIdAndRemove(req.body.query, (err, docs) => {
+        if (err) { return res.json(errors.internalError).status(500) }
+        res.json(docs)
+    })
+})
+
 module.exports = router

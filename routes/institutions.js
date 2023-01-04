@@ -13,7 +13,7 @@ const upload = multer({ dest: 'images/', storage })
 router.post('/find', (req, res) => {
     schema.institution.find(req.body.query || {}, (err, docs) => {
         if (err) { return res.json(errors.internalError).status(500) }
-        else { res.json(docs) }
+        if (docs) { res.json(docs) }
     })
 })
 

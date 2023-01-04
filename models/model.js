@@ -39,8 +39,7 @@ const userSchema = mongoose.Schema({
     password: { type: String, default: '' },
     inviteCode: { type: String, default: '', unique: true },
     acceptCode: { type: String, default: ''},
-    token: { type: String, default: '' },
-    tokenCreated: { type: String, default: ''}
+    token: { type: String, default: '' }
 })
 
 // Config schema

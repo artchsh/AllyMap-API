@@ -1,16 +1,11 @@
 const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
-const helpers = require('./utils/helpers')
+const middlewares = require('./middlewares')
 
 // express setup
 const app = express()
 const port = process.env.PORT || 3000
-app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
-app.use(helpers.logger)
-
-// CORS setup
 const whitelist = ['http://kz.allymap.info', 'https://kz.allymap.info', 'http://localhost:5173']
 app.use(cors({
   origin: (origin, callback) => {
@@ -24,12 +19,21 @@ app.use(cors({
       }
     }
   },
-  methods: ['GET', 'POST', 'OPTIONS']
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  credentials: true
 }))
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+app.use(middlewares.logger)
+app.use(middlewares.authenticate)
+
+// CORS setup
+
 
 //mongoose setup
 const url = process.env.MONGO_DB || 'mongodb://localhost:27017/'
-mongoose.set('strictQuery', true);
+mongoose.set('strictQuery', true)
 async function mongooseConnect() { await mongoose.connect(url) }
 mongooseConnect().catch(err => console.log(err))
 const db = mongoose.connection
