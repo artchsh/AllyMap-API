@@ -29,7 +29,7 @@ router.post('/add', (req, res) => {
 // Remove existing institution
 router.post('/remove', (req, res) => {
     // { query: { id } }
-    schema.institution.deleteOne(req.body.query, (err, docs) => {
+    schema.institution.findOneAndDelete(req.body.query, (err, docs) => {
         if (err) { return res.json(errors.internalError).status(500) }
         if (docs.imagePath != '' && docs.imagePath != undefined) {
             let imagePathBeforeFormat = docs.imagePath
@@ -39,6 +39,16 @@ router.post('/remove', (req, res) => {
                 console.log(`Deleted file ${path}`)
             })
         }
+        schema.comment.find({ institutionID: req.body.query._id }, (err, docs) => {
+            if (err) { return res.json(errors.internalError).status(500 )}
+            if (docs != null || docs != []) {
+                for (let i = 0; i < docs.length; i++) {
+                    schema.comment.findOneAndRemove({ _id: docs[i]._id}, (err, docs) => {
+                        if (err) { return res.json(errors.internalError).status(500) }
+                    })
+                }
+            }
+        })
         res.json(docs)
     })
 })
