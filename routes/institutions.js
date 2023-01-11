@@ -1,13 +1,13 @@
 const express = require('express')
 const router = express.Router()
 const schema = require('../models/model')
-const errors = require('../errors')
+const errors = require('../config/errors')
 const multer = require('multer')
 const fs = require('fs')
 const sharp = require('sharp')
 const uuid = require('uuid')
 
-const storage = multer.memoryStorage();
+const storage = multer.memoryStorage()
 const upload = multer({ dest: 'images/', storage })
 
 router.post('/find', (req, res) => {
@@ -58,11 +58,11 @@ router.post('/request/new', upload.single('image'), async (req, res) => {
     if (req.file != undefined) {
         fs.access("./images", (error) => {
             if (error) {
-                fs.mkdirSync("./images");
+                fs.mkdirSync("./images")
             }
-        });
-        const { buffer } = req.file;
-        const ref = `${uuid.v4()}.webp`;
+        })
+        const { buffer } = req.file
+        const ref = `${uuid.v4()}.webp`
         await sharp(buffer).webp({ quality: 20 }).toFile("./images/" + ref)
         imagePath = `images/${ref}`
     }
@@ -113,7 +113,7 @@ router.post('/request/decline', (req, res) => {
             fs.unlink(path, (err) => {
                 if (err) { return res.json(errors.internalError).status(500) }
                 console.warn(`Deleted file ${path}`)
-            });
+            })
         }
         res.json(docs)
     })

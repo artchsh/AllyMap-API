@@ -1,4 +1,3 @@
-const schema = require('./models/model')
 const validator = require('validator')
 const jwt = require('jsonwebtoken')
 const security = require('./config/security')
@@ -12,7 +11,7 @@ module.exports = {
         // Get received token
         if (authorizationHeader) token = authorizationHeader.split(' ')[1]
         // Paths whitelist
-        const pathsWhitelists = ['/users/login','/users/register','/config','/config/']
+        const pathsWhitelists = ['/users/login', '/users/register', '/config', '/config/', '/users/find']
         // Bypass authorization middleware if path includes "users/login" or "users/register"
         if (pathsWhitelists.includes(req.path)) {
             next()

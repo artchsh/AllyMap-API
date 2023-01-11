@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const schema = require('../models/model')
-const errors = require('../errors')
+const errors = require('../config/errors')
 
 router.post('/get', (req, res) => {
     // { query: { id: 'someid' } }

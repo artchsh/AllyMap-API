@@ -23,4 +23,4 @@ dist-ssr
 *.sw?
 
 images/
-secutiry.js
+.env

@@ -2,20 +2,18 @@ const express = require('express')
 const bcrypt = require('bcrypt')
 const router = express.Router()
 const schema = require('../models/model')
-const uuid = require('uuid')
-const errors = require('../errors')
+const errors = require('../config/errors')
 const jwt = require('jsonwebtoken')
 const security = require('../config/security')
 
 // function that generates invite code for user
 function generateInviteCode() {
-    const length = 8,
-        charset = "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        retVal = "";
+    const length = 8, charset = "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    let retVal = ""
     for (let i = 0, n = charset.length; i < length; ++i) {
-        retVal += charset.charAt(Math.floor(Math.random() * n));
+        retVal += charset.charAt(Math.floor(Math.random() * n))
     }
-    return retVal;
+    return retVal
 }
 
 router.post('/login', (req, res) => {
@@ -23,7 +21,7 @@ router.post('/login', (req, res) => {
     schema.user.findOne({ login }, (err, docs) => {
         if (err) { throw err }
         if (docs == null) {
-            return res.json(errors.accNotFound).status(401)
+            return res.json(errors.accNotFound)
         }
         const password = req.body.password
         const hash = docs.password
@@ -37,7 +35,7 @@ router.post('/login', (req, res) => {
                     inviteCode: docs.inviteCode
                 } // uuid.v4()
                 let token = jwt.sign(updatedDocs, security.JWT_SECRET)
-                schema.user.findOneAndUpdate({_id: docs._id}, { token }, (err, docs) => {
+                schema.user.findOneAndUpdate({ _id: docs._id }, { token }, (err, docs) => {
                     if (err) { res.json(errors.internalError).status(500) }
                     res.json({
                         token,
@@ -65,22 +63,22 @@ router.post('/register', (req, res) => {
             schema.user.findOne({ inviteCode }, (err, docs) => {
                 // проверить не пустой ли docs
                 if (!docs) {
-                    return res.json(errors.invCodeNotFound).status(401)
+                    return res.json(errors.invCodeNotFound).status(400)
+                } else {
+                    // write new user to database
+                    const userNew = new schema.user({
+                        login: req.body.login,
+                        password: hash.toString(),
+                        acceptCode: inviteCode.toString(),
+                        inviteCode: generateInviteCode()
+                    })
+                    userNew.save((err, docs) => {
+                        if (err) { return res.json(errors.accExists).status(403) }
+                        res.json(docs)
+                    })
                 }
-
-                // write new user to database
-                const userNew = new schema.user({
-                    login: req.body.login,
-                    password: hash.toString(),
-                    acceptCode: inviteCode.toString(),
-                    inviteCode: generateInviteCode()
-                })
-                userNew.save((err, docs) => {
-                    console.log(err)
-                    if (err) { return res.json(errors.internalError).status(500) }
-                    res.json(docs)
-                })
             })
+
         })
     })
 })
