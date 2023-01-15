@@ -12,9 +12,12 @@ const whitelist = [
   'https://kz.allymap.info', 
   'http://localhost:5173', 
   'http://localhost:4173', 
-  '192.168.1.']
+  '192.168.1.',
+  'hammerhead-app-q63fx.ondigitalocean.app']
 app.use(cors({
   origin: (origin, callback) => {
+    console.log('--------------------')
+    console.log(origin)
     if (whitelist.indexOf(origin) !== -1 || whitelist.includes(origin)) {
       callback(null, true)
     } else {
