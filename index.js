@@ -8,12 +8,16 @@ const security = require('./config/security')
 const app = express()
 const port = process.env.PORT || 3000
 const whitelist = [
-  'http://kz.allymap.info', 
-  'https://kz.allymap.info', 
-  'http://localhost:5173', 
-  'http://localhost:4173', 
+  'http://kz.allymap.info',
+  'https://kz.allymap.info',
+  'http://localhost:5173',
+  'http://localhost:4173',
   'http://192.168.1.72:4173',
-  'hammerhead-app-q63fx.ondigitalocean.app']
+  'http://192.168.1.72:5173',
+  'hammerhead-app-q63fx.ondigitalocean.app'
+]
+
+// middlewares
 app.use(cors({
   origin: (origin, callback) => {
     console.log('--------------------')
