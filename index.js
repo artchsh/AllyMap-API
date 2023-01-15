@@ -7,7 +7,7 @@ const security = require('./config/security')
 // express setup
 const app = express()
 const port = process.env.PORT || 3000
-const whitelist = ['http://kz.allymap.info', 'https://kz.allymap.info', 'http://localhost:5173', 'http://localhost:4173']
+const whitelist = ['http://kz.allymap.info', 'https://kz.allymap.info', 'http://localhost:5173', 'http://localhost:4173', '192.168.']
 app.use(cors({
   origin: (origin, callback) => {
     if (whitelist.indexOf(origin) !== -1) {
@@ -28,8 +28,6 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(middlewares.logger)
 app.use(middlewares.authenticate)
-
-// CORS setup
 
 
 //mongoose setup

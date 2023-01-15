@@ -10,7 +10,8 @@ const institutionSchema = mongoose.Schema({
     status: { type: Array, default: [] },
     address: { type: String },
     link: { type: String, default: '' },
-    imagePath: { type: String, default: '' }
+    imagePath: { type: String, default: '' },
+    city: { type: String, default: '' }
 })
 
 // RequestInstitution's schema
@@ -20,7 +21,8 @@ const requestInstitutionSchema = mongoose.Schema({
     address:{ type: String },
     description: { type: String, default: '' },
     link: { type: String, default: '' },
-    imagePath: { type: String, default: '' }
+    imagePath: { type: String, default: '' },
+    city: { type: String, default: '' }
 })
 
 // Comment's schema

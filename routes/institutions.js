@@ -82,7 +82,8 @@ router.post('/request/new', upload.single('image'), async (req, res) => {
         userRequestID: req.body.userRequestID,
         link: req.body.link,
         address: req.body.address,
-        imagePath: imagePath
+        imagePath: imagePath,
+        city: req.body.city
     }
     const newRequestInstitution = new schema.requestInstitution(requestInstitutionBody)
     newRequestInstitution.save((err, docs) => {
@@ -102,8 +103,10 @@ router.post('/request/accept', (req, res) => {
             link: docs.link,
             userID: docs.userRequestID,
             address: docs.address,
-            status: ['grey', 'Новенький'],
-            imagePath: docs.imagePath
+            status: '',
+            // ['grey', 'Новенький'],
+            imagePath: docs.imagePath,
+            city: docs.city
         }
         const instituion = new schema.institution(newInstitutionDocs)
         instituion.save((err, docs) => {
