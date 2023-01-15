@@ -3,6 +3,7 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const middlewares = require('./middlewares')
 const security = require('./config/security')
+const helmet = require('helmet')
 
 // express setup
 const app = express()
@@ -40,6 +41,17 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(middlewares.logger)
 app.use(middlewares.authenticate)
+app.use(helmet.dnsPrefetchControl())
+app.use(helmet.expectCt())
+app.use(helmet.frameguard())
+app.use(helmet.hidePoweredBy())
+app.use(helmet.hsts())
+app.use(helmet.ieNoOpen())
+app.use(helmet.noSniff())
+app.use(helmet.originAgentCluster())
+app.use(helmet.permittedCrossDomainPolicies())
+app.use(helmet.referrerPolicy())
+app.use(helmet.xssFilter())
 
 
 //mongoose setup

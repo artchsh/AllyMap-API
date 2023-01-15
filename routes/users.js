@@ -5,6 +5,7 @@ const schema = require('../models/model')
 const errors = require('../config/errors')
 const jwt = require('jsonwebtoken')
 const security = require('../config/security')
+const limit = require('express-limit').limit;
 
 // function that generates invite code for user
 function generateInviteCode() {
@@ -16,7 +17,10 @@ function generateInviteCode() {
     return retVal
 }
 
-router.post('/login', (req, res) => {
+router.post('/login', limit({
+    max: 5,        // 5 requests
+    period: 60 * 1000 // per minute (60 seconds)
+}), (req, res) => {
     const login = req.body.login
     schema.user.findOne({ login }, (err, docs) => {
         if (err) { throw err }
@@ -48,7 +52,10 @@ router.post('/login', (req, res) => {
     })
 })
 
-router.post('/register', (req, res) => {
+router.post('/register', limit({
+    max: 5,        // 5 requests
+    period: 60 * 1000 // per minute (60 seconds)
+}), (req, res) => {
     const saltRounds = 10
     const password = req.body.password
 
