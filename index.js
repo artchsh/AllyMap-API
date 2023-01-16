@@ -1,13 +1,15 @@
 const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
-const middlewares = require('./middlewares')
+const middlewares = require('./utils').middlewares
 const security = require('./config/security')
 const helmet = require('helmet')
 
 // express setup
 const app = express()
 const port = process.env.PORT || 3000
+
+// middlewares
 const whitelist = [
   'http://kz.allymap.info',
   'https://kz.allymap.info',
@@ -17,21 +19,20 @@ const whitelist = [
   'http://192.168.1.72:5173',
   'hammerhead-app-q63fx.ondigitalocean.app'
 ]
-
-// middlewares
 app.use(cors({
   origin: (origin, callback) => {
-    console.log('--------------------')
-    console.log(origin)
-    if (whitelist.indexOf(origin) !== -1 || whitelist.includes(origin)) {
-      callback(null, true)
-    } else {
-      if (origin == undefined) {
-        callback(null, true)
-      } else {
-        callback(new Error('Not allowed by CORS'))
-      }
-    }
+    callback(null, true)
+    // console.log('--------------------')
+    // console.log(origin)
+    // if (whitelist.indexOf(origin) !== -1 || whitelist.includes(origin)) {
+    //   callback(null, true)
+    // } else {
+    //   if (origin == undefined) {
+    //     callback(null, true)
+    //   } else {
+    //     callback(new Error('Not allowed by CORS'))
+    //   }
+    // }
   },
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
@@ -79,10 +80,14 @@ app.get('/api', (req, res) => {
 
 app.listen(port, () => {
   db.once('open', _ => {
-    const API = { name: 'ExpressJS', status: `AllyMap API listening on port - ${port}` }
-    const MONGODB = { name: 'MongoDB', status: `Database connected: ${url}` }
-    const JWT_SECRET = { name: 'JWT', status: `Token retrieved: ${security.JWT_SECRET}` }
-    console.table([API, MONGODB, JWT_SECRET], ['name', 'status'])
+    const API = { name: 'API_PORT', value: port }
+    const MONGODB = { name: 'MONGODB_URL', value: url }
+    const JWT_SECRET = { name: 'JWT_SECRET', value: security.JWT_SECRET }
+    const ACCESS_KEY_ID = { name: 'ACCESS_KEY_ID', value: security.accessKeyId }
+    const SECRET_ACCESS_KEY = { name: 'SECRET_ACCESS_KEY', value: security.secretAccessKey }
+    const array = [API, MONGODB, JWT_SECRET, ACCESS_KEY_ID, SECRET_ACCESS_KEY]
+    const transformed = array.reduce((acc, {name, ...x}) => { acc[name] = x; return acc}, {})
+    console.table(transformed)
   })
   db.on('error', err => {
     console.error('Сonnection error:', err)
